@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/base32"
 	"encoding/gob"
-	"github.com/gogo/protobuf/proto"
 	"net/http"
 	"strings"
 
-	"github.com/boltdb/bolt"
+	"github.com/go-extras/boltstore/shared"
+	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
-	"github.com/yosssi/boltstore/shared"
+	bolt "go.etcd.io/bbolt"
 )
 
 // Store represents a session store.
@@ -73,8 +73,9 @@ func (s *Store) Save(r *http.Request, w http.ResponseWriter, session *sessions.S
 func (s *Store) load(session *sessions.Session) (bool, error) {
 	// exists represents whether a session data exists or not.
 	var exists bool
+	var expired bool
+	id := []byte(session.ID)
 	err := s.db.View(func(tx *bolt.Tx) error {
-		id := []byte(session.ID)
 		bucket := tx.Bucket(s.config.DBOptions.BucketName)
 		// Get the session data.
 		data := bucket.Get(id)
@@ -87,15 +88,20 @@ func (s *Store) load(session *sessions.Session) (bool, error) {
 		}
 		// Check the expiration of the session data.
 		if shared.Expired(sessionData) {
-			err := s.db.Update(func(txu *bolt.Tx) error {
-				return txu.Bucket(s.config.DBOptions.BucketName).Delete(id)
-			})
+			expired = true
 			return err
 		}
 		exists = true
 		dec := gob.NewDecoder(bytes.NewBuffer(sessionData.Values))
 		return dec.Decode(&session.Values)
 	})
+	if expired {
+		if updateErr := s.db.Update(func(txu *bolt.Tx) error {
+			return txu.Bucket(s.config.DBOptions.BucketName).Delete(id)
+		}); updateErr != nil {
+			err = updateErr
+		}
+	}
 	return exists, err
 }
 

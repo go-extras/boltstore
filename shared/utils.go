@@ -3,8 +3,8 @@ package shared
 import (
 	"time"
 
+	"github.com/go-extras/boltstore/shared/protobuf"
 	"github.com/gogo/protobuf/proto"
-	"github.com/yosssi/boltstore/shared/protobuf"
 )
 
 // Session converts the byte slice to the session struct value.

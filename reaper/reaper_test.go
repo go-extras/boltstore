@@ -2,12 +2,12 @@ package reaper
 
 import (
 	"fmt"
-	"github.com/gogo/protobuf/proto"
 	"testing"
 	"time"
 
-	"github.com/boltdb/bolt"
-	"github.com/yosssi/boltstore/shared"
+	"github.com/go-extras/boltstore/shared"
+	"github.com/gogo/protobuf/proto"
+	bolt "go.etcd.io/bbolt"
 )
 
 func TestRun(t *testing.T) {

@@ -3,12 +3,12 @@ package reaper
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/yosssi/boltstore/shared/protobuf"
 	"log"
 	"time"
 
-	"github.com/boltdb/bolt"
-	"github.com/yosssi/boltstore/shared"
+	"github.com/go-extras/boltstore/shared"
+	"github.com/go-extras/boltstore/shared/protobuf"
+	bolt "go.etcd.io/bbolt"
 )
 
 //##############//
@@ -52,7 +52,7 @@ func reap(db *bolt.DB, options Options, quitC <-chan struct{}, doneC chan<- stru
 		case <-ticker.C: // Check if the ticker fires a signal.
 			// This slice is a buffer to save all expired session keys.
 			type kv struct {
-				key []byte
+				key   []byte
 				value *protobuf.Session
 			}
 			expiredSessionKeys := make([]kv, 0)

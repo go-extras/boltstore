@@ -1,10 +1,10 @@
 package shared
 
 import (
-	"github.com/yosssi/boltstore/shared/protobuf"
 	"testing"
 	"time"
 
+	"github.com/go-extras/boltstore/shared/protobuf"
 	"github.com/gogo/protobuf/proto"
 )
 
